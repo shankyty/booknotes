@@ -33,13 +33,13 @@ Example Candidate-Interviewer conversation:
  * I: Up to you.
  * C: Do we need to inform throttled users?
  * I: Yes.
-
-Summary of requirements:
- * Accurately limit excess requests
- * Low latency & as little memory as possible
- * Distributed rate limiting.
- * Exception handling
- * High fault tolerance - if cache server goes down, rate limiter should continue functioning.
+> [!IMPORTANT]
+> Summary of requirements:
+> * Accurately limit excess requests
+> * Low latency & as little memory as possible
+> * Distributed rate limiting.
+> * Exception handling
+> * High fault tolerance - if cache server goes down, rate limiter should continue functioning.
 
 # Step 2 - Propose high-level design and get buy-in
 We'll stick with a simple client-server model for simplicity.
@@ -95,14 +95,14 @@ How many buckets do we need? - depends on the requirements:
  * We might need different buckets per API endpoints if we need to support 3 tweets per second, 5 posts per second, etc.
  * Different buckets per IP if we want to make IP-based throttling.
  * A single global bucket if we want to globally setup 10k requests per second max.
-
-Pros:
- * Easy to implement
- * Memory efficient
- * Throttling gets activated in the event of sustained high traffic only. If bucket size is large, this algorithm supports short bursts in traffic as long as they're not prolonged.
-
-Cons:
- * Parameters might be challenging to tune properly
+> [!IMPORTANT]
+> Pros:
+> * Easy to implement
+> * Memory efficient
+> * Throttling gets activated in the event of sustained high traffic only. If bucket size is large, this algorithm supports short bursts in traffic as long as they're not prolonged.
+>
+>Cons:
+> * Parameters might be challenging to tune properly
 
 ### Leaking bucket algorithm
 Similar to token bucket algorithm, but requests are processed at a fixed rate.
@@ -117,14 +117,14 @@ Parameters:
  * Outflow rate - how many requests to be processed at fixed intervals.
 
 Shopify uses leaking bucket for rate-limiting.
-
-Pros:
- * Memory efficient
- * Requests processed at fixed interval. Useful for use-cases where a stable outflow rate is required.
-
-Cons:
- * A burst of traffic fills up the queue with old requests. Recent requests will be rate limited.
- * Parameters might not be easy to tune.
+> [!IMPORTANT]
+> Pros:
+>  * Memory efficient
+>  * Requests processed at fixed interval. Useful for use-cases where a stable outflow rate is required.
+> 
+> Cons:
+>  * A burst of traffic fills up the queue with old requests. Recent requests will be rate limited.
+>  * Parameters might not be easy to tune.
 
 ### Fixed window counter algorithm
 How it works:
@@ -135,14 +135,14 @@ How it works:
 
 One major problem with this approach is that a burst of traffic in the edges can allow more requests than allowed to pass through:
 ![traffic-burst-problem](images/traffic-burst-problem.png)
-
-Pros:
- * Memory efficient
- * Easy to understand
- * Resetting available quota at the end of a unit of time fits certain use cases
-
-Cons:
- * Spike in traffic could cause more requests than allowed to go through a given time window
+> [!IMPORTANT]
+> Pros:
+>  * Memory efficient
+>  * Easy to understand
+>  * Resetting available quota at the end of a unit of time fits certain use cases
+>
+> Cons:
+>  * Spike in traffic could cause more requests than allowed to go through a given time window
 
 ### Sliding window log algorithm
 To resolve the previous algorithm's issue, we could use a sliding time window instead of a fixed one.
@@ -155,12 +155,12 @@ How it works:
 
 Note that the 3rd request in this example is rejected, but timestamp is still recorded in the log:
 ![sliding-window-log-algo](images/sliding-window-log-algo.png)
-
-Pros:
- * Rate limiting accuracy is very high
-
-Cons:
- * Memory footprint is very high
+> [!IMPORTANT]
+> Pros:
+>  * Rate limiting accuracy is very high
+>
+> Cons:
+>  * Memory footprint is very high
 
 ### Sliding window counter algorithm
 A hybrid approach which combines the fixed window + sliding window log algorithms.
@@ -170,13 +170,13 @@ How it works:
  * Maintain a counter for each time window. Increment for given time window on each request.
  * Derive sliding window counter = `prev_window * prev_window_overlap + curr_window * curr_window_overlap` (see screenshot above)
  * If counter exceeds threshold, request is rejected, otherwise it is accepted.
-
-Pros:
- * Smooths out spikes in traffic as rate is based on average rate of previous window
- * Memory efficient
-
-Cons:
- * Not very accurate rate limiting, as it's based on overlaps. But experiments show that only ~0.003% of requests are inaccurately accepted.
+> [!IMPORTANT]
+> Pros:
+>  * Smooths out spikes in traffic as rate is based on average rate of previous window
+>  * Memory efficient
+>
+> Cons:
+>  * Not very accurate rate limiting, as it's based on overlaps. But experiments show that only ~0.003% of requests are inaccurately accepted.
 
 ## High-level architecture
 We'll use an in-memory cache as it's more efficient than a database for storing the rate limiting buckets - eg Redis.
@@ -209,7 +209,7 @@ When a request is rate limited, a 429 (too many requests) error code is returned
 In some cases, the rate-limited requests can be enqueued for future processing.
 
 We could also include some additional HTTP headers to provide additional metadata info to clients:
-```
+```http
 X-Ratelimit-Remaining: The remaining number of allowed requests within the window.
 X-Ratelimit-Limit: It indicates how many calls the client can make per time window.
 X-Ratelimit-Retry-After: The number of seconds to wait until you can make a request again without being throttled.
@@ -265,12 +265,30 @@ We discussed a bunch of rate-limiting algorithms:
  * Sliding window counter - good when you don't want 100% accuracy with a very low memory footprint.
 
 Additional talking points if time permits:
- * Hard vs. soft rate limiting
-   * Hard - requests cannot exceed the specified threshold 
-   * Soft - requests can exceed threshold for some limited time
- * Rate limiting at different layers - L7 (application) vs L3 (network)
- * Client-side measures to avoid being rate limited:
-   * Client-side cache to avoid excessive calls
-   * Understand limit and avoid sending too many requests in a small time frame
-   * Gracefully handle exceptions due to being rate limited
-   * Add sufficient back-off and retry logic
+- Hard vs. soft rate limiting
+  - Hard - requests cannot exceed the specified threshold 
+  - Soft - requests can exceed threshold for some limited time
+    | Feature | Hard Rate Limiting | Soft Rate Limiting |
+    | :--- | :--- | :--- |
+    | **Behavior at Limit** | Immediately rejects new requests | Allows a temporary burst over the limit |
+    | **Strictness** | Very strict, no exceptions | Flexible, has a grace period or burst allowance |
+    | **Use Case** | Protecting critical resources, enforcing strict API usage tiers | Ensuring good user experience, handling temporary traffic spikes |
+    | **Analogy** | A locked gate once full | A waiting area for temporary overflow |
+      
+ - Rate limiting at different layers - L7 (application) vs L3 (network)
+   - At its core, Layer 7 rate limiting operates at the application level, affording it a deep understanding of the traffic it's managing. This allows for the creation of sophisticated and context-aware rules. Instead of just looking at the source of the traffic, Layer 7 rate limiting can inspect the content of the requests themselves.
+ 
+   - Layer 3 rate limiting functions at the network layer, primarily focusing on the IP protocol. Its main concern is the volume of traffic originating from specific IP addresses. 
+      |Feature|Layer 7 (Application)|Layer 3 (Network)|
+      |:-------|:----------------------|:----------------| 
+      |**Focus**	|Application-specific requests and content	|IP addresses and traffic volume
+      |**Granularity**	|High (User ID, API key, URL path, etc.)	|Low (Primarily IP address)
+      |**Typical Use Cases**	|API protection, brute-force prevention, content scraping mitigation	|Volumetric DDoS mitigation
+      |**Resource Intensity**|	High|	Low|
+      |**Complexity**	|High	|Low|
+      |**Accuracy**	|High, less prone to false positives	|Lower, can block legitimate users|
+ - [ ] Client-side measures to avoid being rate limited:
+    - [ ] Client-side cache to avoid excessive calls
+    - [ ] Understand limit and avoid sending too many requests in a small time frame
+    - [ ] Gracefully handle exceptions due to being rate limited
+    - [ ] Add sufficient back-off and retry logic
