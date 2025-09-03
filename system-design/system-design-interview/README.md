@@ -5,7 +5,7 @@ Instead of getting the physical books, I've bought the online course, so there m
 
 **Note:** These notes are a work in progress. I'll remove this remark once I go through the whole book.
 
- * [Chapter 2 - Scale From Zero To Millions Of Users](./chapter02)
+ * [Chapter 2 - Scale From Zero To Millions Of Users](./chapter02/README.MD)
  * [Chapter 3 - Back-of-the-envelope Estimation](./chapter03)
  * [Chapter 4 - A Framework For System Design Interviews](./chapter04)
  * [Chapter 5 - Design A Rate Limiter](./chapter05)
