@@ -14,7 +14,7 @@ Instead of getting the physical books, I've bought the online course, so there m
  * [Chapter 8 - Design A Unique ID Generator In Distributed Systems](./chapter08/README.md)
  * [Chapter 9 - Design A URL Shortener](./chapter09/README.md)
  * [Chapter 10 - Design A Web Crawler](./chapter10/README.md)
- * [Chapter 11 - Design A Notification System](./chapter11)
+ * [Chapter 11 - Design A Notification System](./chapter11/README.md)
  * [Chapter 12 - Design A News Feed System](./chapter12)
  * [Chapter 13 - Design A Chat System](./chapter13)
  * [Chapter 14 - Design A Search Autocomplete System](./chapter14)
