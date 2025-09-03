@@ -29,7 +29,9 @@ Using the same hash function for the requests, we map the servers based on serve
 ![hash-servers](images/hash-servers.png)
 
 # Hash keys
-The hashes of the requests also get resolved somewhere along the hash ring. Notice that we're not using the modulo operator in this case:
+The hashes of the requests also get resolved somewhere along the hash ring. 
+>[!Important]
+> We're not using the modulo operator since hash ring contains all possible value of output of hash function in ring.
 ![hash-keys](images/hash-keys.png)
 
 # Server lookup
