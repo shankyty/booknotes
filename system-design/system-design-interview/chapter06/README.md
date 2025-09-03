@@ -12,7 +12,8 @@ serverIndex = hash(key) % N, where N is the number of servers
 This makes it so requests are distributed uniformly across all servers.
 However, whenever new servers are added or removed, the result of the above equation is very different, meaning that a lot of requests will get rerouted across servers.
 
-This causes a lot of cache misses as clients will be connected to new instances which will have to fetch the user data from cache all over again.
+>[!NOTE]
+>This causes a lot of cache misses as clients will be connected to new instances which will have to fetch the user data from cache all over again.
 
 # Consistent hashing
 Consistent hashing is a technique which allows only a K/N servers to be remapped whenever N changes, where K is the number of keys.
