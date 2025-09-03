@@ -66,7 +66,7 @@ Now, a request is mapped to the closest virtual node on the hash ring:
 The more virtual nodes we have, the more evenly distributed the requests will be.
 
 >[!NOTE] 
-> An experiment showed that between 100-200 virtual nodes leads to a standard deviation between 5-10%.
+> An experiment showed that between 100-200 virtual nodes leads to a standard deviation between 5-10% for key distrubution among virtual node.
 
 # Wrap up
 Benefits of consistent hashing:
