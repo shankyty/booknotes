@@ -64,6 +64,7 @@ Now, a request is mapped to the closest virtual node on the hash ring:
 ![virtual-node-request-mapping](images/virtual-node-request-mapping.png)
 
 The more virtual nodes we have, the more evenly distributed the requests will be.
+This will enable to add server with heterogenous resources to be part of ring.
 
 >[!NOTE] 
 > An experiment showed that between 100-200 virtual nodes leads to a standard deviation between 5-10% for key distrubution among virtual node.
