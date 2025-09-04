@@ -17,7 +17,7 @@ There's always a trade-off to be made between read/write and memory usage.
 Another trade-off is between consistency and availability.
 
 Here are the characteristics we're striving to achieve:
- * Key-value pair size is small - 10kb
+ * Key-value pair size is small - 10kb(what if this is 10MB,100MB ,what would change?)
  * We need to be able to store a lot of data.
  * High availability - system responds quickly even during failures.
  * High scalability - system can be scaled to support large data sets.
