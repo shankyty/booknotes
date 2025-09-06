@@ -89,8 +89,9 @@ To achieve high availability & reliability, data needs to be replicated on multi
 We can achieve that by allocating a key to multiple nodes on the hash ring:
 ![data-replication](images/data-replication.png)
 
-One caveat to keep in mind that your key might get allocated to virtual nodes mapped to the same physical node. 
-To avoid this, we can only choose unique physical nodes when replicating data.
+> [!Note] 
+> One caveat to keep in mind that your key might get allocated to virtual nodes mapped to the same physical node. 
+> To avoid this, we can only choose unique physical nodes when replicating data.
 
 An additional reliability measure is to replicate data across multiple data centers as nodes in the same data centers can fail at the same time.
 
