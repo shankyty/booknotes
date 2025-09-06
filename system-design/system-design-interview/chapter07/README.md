@@ -13,8 +13,10 @@ We're now about to design a key-value store which supports:
  * `get(key)` - get `value` associated to `key`
 
 # Understand the problem and establish design scope
-There's always a trade-off to be made between read/write and memory usage.
-Another trade-off is between consistency and availability.
+
+> [!Important] 
+> - There's always a trade-off to be made between read/write and memory usage.
+> - Another trade-off is between consistency and availability.
 
 Here are the characteristics we're striving to achieve:
  * Key-value pair size is small - 10kb(what if this is 10MB,100MB ,what would change?)
