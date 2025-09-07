@@ -67,6 +67,7 @@ Twitter's snowflake meets our design requirements because it is sortable by time
 
 
 '''go
+
 func (n *singleWorker) NextID() (id SingleWorkerID, err error) {
 
 	n.mu.Lock()
