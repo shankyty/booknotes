@@ -65,8 +65,7 @@ Twitter's snowflake meets our design requirements because it is sortable by time
 ![twitter-snowflake](images/twitter-snowflake.png)
 
 
-
-'''go
+```go
 
 func (n *singleWorker) NextID() (id SingleWorkerID, err error) {
 
@@ -97,7 +96,7 @@ func (n *singleWorker) NextID() (id SingleWorkerID, err error) {
 	n.mu.Unlock()
 	return
 }
-'''
+```
 
 Breakdown of the different sections:
  * Sign bit - always 0. Reserved for future use.
