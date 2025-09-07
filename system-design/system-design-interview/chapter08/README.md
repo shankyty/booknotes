@@ -64,6 +64,40 @@ Cons:
 Twitter's snowflake meets our design requirements because it is sortable by time, 64-bits and can be generated independently in each server.
 ![twitter-snowflake](images/twitter-snowflake.png)
 
+
+
+'''go
+func (n *singleWorker) NextID() (id SingleWorkerID, err error) {
+
+	n.mu.Lock()
+
+	now := time.Now().UnixNano() / 1000000
+
+	if now < n.lastTimeStamp {
+		return SingleWorkerID(0), fmt.Errorf("Clock moved backwards. Refusing to generate id for %d milliseconds", n.lastTimeStamp-now)
+	}
+
+	if n.lastTimeStamp == now {
+		n.sequence = (n.sequence + 1) & sequenceMask
+
+		if n.sequence == 0 {
+			now = snowflake.TilNextMillis(n.lastTimeStamp)
+		}
+	} else {
+		n.sequence = 0
+	}
+
+	n.lastTimeStamp = now
+
+	id = SingleWorkerID((now-snowflake.TW_EPOCH)<<timestampLeftShift |
+		(n.nodeID << nodeIdShift) |
+		n.sequence)
+
+	n.mu.Unlock()
+	return
+}
+'''
+
 Breakdown of the different sections:
  * Sign bit - always 0. Reserved for future use.
  * Timestamp - 41 bits. Milliseconds since epoch (or since custom epoch). Allows 69 years max.
