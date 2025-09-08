@@ -25,6 +25,10 @@ For example, K=100, N=10 -> 10 re-mappings, compared to close to 100 in the norm
 A hash ring is a visualization of the possible key space of a given hash algorithm, which is combined into a ring-like structure:
 ![hash-ring](images/hash-ring.png)
 
+>[!Note]
+> Murmurhash3 is popular because of its speed on x86 platforms and good distribution for low collision
+
+
 # Hash servers
 Using the same hash function for the requests, we map the servers based on server IP or name onto the hash ring:
 ![hash-servers](images/hash-servers.png)
