@@ -114,6 +114,12 @@ func (n *singleWorker) NextID() (id SingleWorkerID, err error) {
 We explored multiple ways to generate unique IDs and settled on snowflake eventually as it serves our purpose best.
 
 Additional talking points:
- * Clock synchronization - network time protocol can be used to resolve clock inconsistencies across different machines/CPU cores.
+ - Clock synchronization - network time protocol can be used to resolve clock inconsistencies across different machines/CPU cores.
+   - NTP is absolutely critical for the timestamp portion. By using NTP, every machine in the distributed system that generates Snowflake IDs agrees on the current time. This synchronization ensures:
+   - Global Monotonicity: IDs generated later will always have a greater timestamp value than IDs generated earlier, regardless of which machine created them. This allows you to sort records by their Snowflake ID and have them be chronologically ordered.
+   - Collision Avoidance: Without synchronized time, if a machine's clock were to go backward (e.g., after a reboot and incorrect sync), it could start generating timestamps it has already used, leading to duplicate IDs. NTP prevents this clock regression.
+   - In short, NTP acts as the conductor of an orchestra, ensuring every machine's clock "plays" in perfect time. This allows the timestamp component of the Snowflake ID to be a reliable and globally consistent measure of time, which is the foundation of the entire system.
  * Section length tuning - we could sacrifice some sequence number bits for more timestamp bits in case of low concurrency and long-term applications.
  * High availability - ID generators are a critical component and must be highly available.
+
+
