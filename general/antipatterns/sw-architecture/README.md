@@ -1,2 +1,0 @@
-# Software Architecture Anti Patterns
-
