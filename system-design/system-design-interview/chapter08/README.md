@@ -120,6 +120,19 @@ Additional talking points:
    - Collision Avoidance: Without synchronized time, if a machine's clock were to go backward (e.g., after a reboot and incorrect sync), it could start generating timestamps it has already used, leading to duplicate IDs. NTP prevents this clock regression.
    - In short, NTP acts as the conductor of an orchestra, ensuring every machine's clock "plays" in perfect time. This allows the timestamp component of the Snowflake ID to be a reliable and globally consistent measure of time, which is the foundation of the entire system.
  * Section length tuning - we could sacrifice some sequence number bits for more timestamp bits in case of low concurrency and long-term applications.
- * High availability - ID generators are a critical component and must be highly available.
+ - High availability - ID generators are a critical component and must be highly available.
+ 	- Decentralization: The Core Principle
+  	  - Instead of having one central service that hands out IDs (which would be a major bottleneck and a single point of failure), a Snowflake-style approach makes every machine its own ID generator.
+   	  - Each application server, or "worker," that needs to create an ID can generate it locally without talking to any other service. This is the foundation of its high availability.
+   	  - How it works: Each machine is assigned a unique Machine ID (or Worker ID) during startup. This ID is embedded into every unique ID it generates. Because each machine has its own distinct ID, there's no risk of two different machines generating the same ID, even at the exact same millisecond.
+   	- Fault Isolation and Resilience
+   	  - This decentralized model provides excellent fault tolerance.
+   	  - If one machine fails: The other machines are completely unaffected. They continue to generate their own unique IDs without interruption. The system as a whole remains available and can still create new records. The only impact is that one machine is temporarily out of the pool.
+   	  - No network dependency for generation: Once a machine has its Machine ID, it doesn't need to communicate with a central coordinator to create an ID. This makes it resilient to network partitions and latency issues that would cripple a centralized ID generator.
+	- The Role of a Coordinator (and Its Limits)
+      - While the ID generation is decentralized, the assignment of the unique Machine ID often requires a lightweight coordination service, like Apache ZooKeeper.
+   	  - On Startup: A worker machine will register with ZooKeeper to claim a unique Machine ID from a predefined pool (e.g., from 0 to 1023).
+      - During Operation: The machine operates independently. It does not need to talk to ZooKeeper again unless it reboots.
+      - This means ZooKeeper is only a dependency during the brief startup phase, not during the critical path of ID generation. Even if ZooKeeper goes down, all currently running machines will continue to function perfectly, ensuring high availability for the core service.
 
 
